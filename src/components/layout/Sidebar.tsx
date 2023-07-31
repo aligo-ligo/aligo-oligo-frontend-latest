@@ -5,9 +5,9 @@ import { useAuthService } from "../../hooks/useAuth";
 import { FiEdit } from "react-icons/fi";
 import { CSSTransition } from "react-transition-group";
 import "../../styles/Sidebar.css";
-import { useContext } from "react";
-import { AuthStateContext } from "../../context/AuthStateContext";
-import { LoudOli, OliImage } from "../../utils/constant/image";
+import { LoudOli, LouderOli, OliImage } from "../../utils/constant/image";
+import { useGenerationStore } from "../../store/store";
+import useToastList from "../../hooks/useToastList";
 
 type Props = {
 	isNameExisted: boolean;
@@ -15,13 +15,15 @@ type Props = {
 };
 const Sidebar = ({ isNameExisted, name }: Props) => {
 	const { isSideBarOpen, outside, closeSideBar } = usePopUp();
-	const { updateLoggedIn } = useContext(AuthStateContext);
+	const { setUpdateHook } = useGenerationStore();
+	const { show } = useToastList();
 	const authService = useAuthService();
 	const navigate = useNavigate();
 
 	const hook = () => {
 		authService?.logout();
-		updateLoggedIn();
+		setUpdateHook(true);
+		show("logoutToast");
 		closeSideBar();
 	};
 
@@ -62,19 +64,36 @@ const Sidebar = ({ isNameExisted, name }: Props) => {
 					{isNameExisted ? (
 						<div>
 							{sidebarData.map(({ title, link, icon }, index) => {
-								return (
-									<div
-										key={index}
-										className="flex items-center cursor-pointer font-bold px-4 hover:text-gray"
-										onClick={() => {
-											navigate(link);
-											closeSideBar();
-										}}
-									>
-										<div className="w-8">{icon}</div>
-										<div className="px-4 py-6">{title}</div>
-									</div>
-								);
+								if (link.startsWith("https")) {
+									return (
+										<a
+											target="blank"
+											key={index}
+											className="flex items-center cursor-pointer font-bold px-4 hover:text-gray"
+											href={link}
+											onClick={() => {
+												closeSideBar();
+											}}
+										>
+											<div className="w-8">{icon}</div>
+											<div className="px-4 py-6">{title}</div>
+										</a>
+									);
+								} else {
+									return (
+										<div
+											key={index}
+											className="flex items-center cursor-pointer font-bold px-4 hover:text-gray"
+											onClick={() => {
+												navigate(link);
+												closeSideBar();
+											}}
+										>
+											<div className="w-8">{icon}</div>
+											<div className="px-4 py-6">{title}</div>
+										</div>
+									);
+								}
 							})}
 						</div>
 					) : (
@@ -115,6 +134,11 @@ const landingSidebarData = [
 		icon: <FiEdit />,
 		link: "/faq",
 	},
+	{
+		title: "피드백 폼으로 이동하기",
+		icon: <img src={LoudOli} alt="사진" />,
+		link: "/faq",
+	},
 ];
 
 const sidebarData = [
@@ -125,7 +149,12 @@ const sidebarData = [
 	},
 	{
 		title: "서비스 이용 노하우",
-		icon: <img src={LoudOli} alt="사진" />,
+		icon: <img src={LouderOli} alt="사진" />,
 		link: "/faq",
+	},
+	{
+		title: "피드백 폼으로 이동하기",
+		icon: <img src={LoudOli} alt="사진" />,
+		link: "https://naver.me/5P2zatjt",
 	},
 ];
