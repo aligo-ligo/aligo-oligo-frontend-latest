@@ -1,23 +1,32 @@
-export type TargetResponse = Promise<TargetType[]>;
+export type TargetResponse = Promise<TargetNewResponse>;
 
 export interface TargetService {
 	getAllTarget: () => TargetResponse;
-	getTarget: (id: string | undefined) => Promise<TargetType>;
+	getTarget: (id: string | undefined) => Promise<TargetDetailType>;
 	postTarget: (targetInfo: TargetInfoType) => Promise<CreateTargetResponse>;
 	postSubGoal: (subGoalInfo: PostSubGoalType) => Promise<PostResultType>;
 }
 
-export interface TargetType {
+export interface TargetNewResponse {
+	targetListLength : number
+	targetInfo : TargetBasicType[]
+}
+
+export interface TargetBasicType {
 	id: number;
 	userId: number;
+	goal: string;
+	achievementPer: number;
+	successRate: number;
+}
+
+export interface TargetDetailType extends TargetBasicType  {
 	startDate: string;
 	endDate: string;
-	goal: string;
 	subGoal: SubGoalType[];
 	routine: RoutineType[];
 	penalty: string;
 	achievementDate: AchievementDate;
-	achievementPer: number;
 	successVote: number;
 	failureVote: number;
 	voteTotal: number;
