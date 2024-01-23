@@ -8,7 +8,7 @@ export interface TargetService {
 }
 
 export interface TargetNewResponse {
-	targetListLength : number
+	totalCount : number
 	targetInfo : TargetBasicType[]
 }
 

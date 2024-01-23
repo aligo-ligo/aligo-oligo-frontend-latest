@@ -3,7 +3,7 @@ import Header from "../components/target/Header";
 import TargetForm from "../components/target/TargetForm";
 import { FiEdit } from "react-icons/fi";
 import { Carousel } from "react-responsive-carousel";
-import { CSSProperties } from "react";
+import { CSSProperties, useState } from "react";
 import StyledButton from "../components/common/StyledButton";
 import TargetEmptyForm from "../components/target/TargetEmptyForm";
 import { FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
@@ -14,8 +14,17 @@ import useGetAllTargets from "../hooks/api/target/useGetAllTargets";
 
 const Target = () => {
   const navigate = useNavigate();
-  const { data: targets, isLoading } = useGetAllTargets();
-  console.log("targets", targets);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const { data: targets, isLoading } = useGetAllTargets(
+    { page: Math.floor(currentPage / 5) },
+    {
+      keepPreviousData: true,
+    }
+  );
+
+  // stack 해야하는 이유를 모르겠다. buffer를 줘서
+  // 누적할 필요가 없을 것 같다!
+
   const name = localStorage.getItem("userNickName");
 
   const arrowStyles: CSSProperties = {
@@ -24,6 +33,10 @@ const Target = () => {
     top: "calc(70% - 15px)",
     fontSize: "40px",
     cursor: "pointer",
+  };
+  const handlePageChange = (page: number, callback: () => void) => {
+    callback();
+    setCurrentPage(page);
   };
 
   return (
@@ -34,7 +47,7 @@ const Target = () => {
           현재 타겟 목록
         </h1>
         <div className="flex flex-row justify-center mt-8 h-full">
-          {typeof targets === "undefined" && (
+          {targets?.targetInfo.length === 0 && (
             <div className="flex flex-col items-end">
               {isLoading && <SkeletonElement type="text" />}
               <TargetEmptyForm isLoading={isLoading} />
@@ -50,7 +63,9 @@ const Target = () => {
               hasPrev && (
                 <button
                   type="button"
-                  onClick={onClickHandler}
+                  onClick={() =>
+                    handlePageChange(currentPage - 1, onClickHandler)
+                  }
                   title={label}
                   style={{ ...arrowStyles, left: 15, top: 200 }}
                 >
@@ -62,7 +77,9 @@ const Target = () => {
               hasNext && (
                 <button
                   type="button"
-                  onClick={onClickHandler}
+                  onClick={() =>
+                    handlePageChange(currentPage + 1, onClickHandler)
+                  }
                   title={label}
                   style={{ ...arrowStyles, right: 15, top: 200 }}
                 >
@@ -70,32 +87,21 @@ const Target = () => {
                 </button>
               )
             }
-            statusFormatter={(
-              currentItem: number,
-              total: number
-            ): string | JSX.Element => {
+            statusFormatter={(currentItem: number): string | JSX.Element => {
               return (
-                <span className="text-black font-bold text-sm">{`${total}개의 목표 중 ${currentItem}번째`}</span>
+                <span className="text-black font-bold text-sm">{`${targets?.totalCount}개의 목표 중 ${currentItem}번째`}</span>
               );
             }}
           >
-            {targets?.map(
-              ({
-                id,
-                userId,
-                goal,
-                voteTotal,
-                successVote,
-                achievementPer,
-              }) => (
+            {targets?.targetInfo.map(
+              ({ id, userId, goal, successRate, achievementPer }) => (
                 <TargetForm
                   key={id}
                   {...{
                     id,
                     userId,
                     goal,
-                    voteTotal,
-                    successVote,
+                    successRate,
                     achievementPer,
                   }}
                 />
