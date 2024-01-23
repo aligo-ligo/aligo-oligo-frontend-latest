@@ -4,6 +4,7 @@ import { TargetNewResponse } from "../../../types/TargetTypes";
 
 interface GetAllTargetsParams {
   page: number;
+  pageSize: number;
 }
 
 const useGetAllTargets = (
@@ -14,7 +15,9 @@ const useGetAllTargets = (
     queryKey: ["targets", params?.page],
     queryFn: async () => {
       console.log("API 호출");
-      return get<TargetNewResponse>(`target/list?page=${params?.page}&size=5`);
+      return get<TargetNewResponse>(
+        `target/list?page=${params?.page}&size=${params.pageSize}`
+      );
     },
     ...options,
   });
